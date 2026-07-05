@@ -3,6 +3,7 @@ FROM alpine:3.21
 RUN apk update && \
     apk add --no-cache nginx openssl
 
+# Create a self-signed X.509 certificate to encrypt TLS connections so as to enable HTTPS
 RUN openssl req -x509 -nodes -days 365 \
     -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/inception.key \

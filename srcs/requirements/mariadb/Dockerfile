@@ -10,5 +10,8 @@ COPY tools/setup.sh /setup.sh
 
 RUN chmod +x /setup.sh
 
+# Mainly for documentation as the containers communicate over the internal network
+EXPOSE 3306
+
 CMD ["/setup.sh"]
 

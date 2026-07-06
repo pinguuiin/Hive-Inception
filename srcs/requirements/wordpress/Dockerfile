@@ -16,14 +16,17 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 # Create runtime directory
 RUN mkdir -p /run/php
 
+# WordPress file directory
+WORKDIR /var/www/html
+
 # Override the default PHP-FPM configuration file
 COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
 
-COPY tools/setup.sh /setup.sh
-RUN chmod +x /setup.sh
+COPY tools/setup.sh /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
 
 # PHP-FPM listens on port 9000, mainly for documentation as containers communicate over
 # the internal network. This port is not published to the host.
 EXPOSE 9000
 
-CMD ["/setup.sh"]
+CMD ["/usr/local/bin/setup.sh"]

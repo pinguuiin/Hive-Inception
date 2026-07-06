@@ -8,7 +8,7 @@ RUN apk update && \
     php83-phar \
     curl
 
-# Install WP-CLI and make it executable by just typing `wp`
+# Install WP-CLI and move it to system PATH to make it executable by just typing `wp`
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp

@@ -1,3 +1,13 @@
+secrets:
+	mysql_password:
+		file: ../secrets/mysql_password
+	mysql_root_password:
+		file: ../secrets/mysql_root_password
+	wp_admin_password:
+		file: ../secrets/wp_admin_password
+	wp_user_password:
+		file: ../secrets/wp_user_password
+
 services:
 	# NGINX web server
 	nginx:
@@ -21,6 +31,14 @@ services:
 			- mariadb
 		env_file:
 			- .env
+		secrets:
+			- mysql_password
+			- wp_admin_password
+			- wp_user_password
+		environment:
+			MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+			WP_ADMIN_PASSWORD_FILE: /run/secrets/wp_admin_password
+			WP_USER_PASSWORD_FILE: /run/secrets/wp_user_password
 		volumes:
 			- wordpress-data:/var/www/html
 		networks:
@@ -33,6 +51,12 @@ services:
 		container_name: inception_mariadb
 		env_file:
 			- .env
+		secrets:
+			- mysql_password
+			- mysql_root_password
+		environment:
+			MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+			MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
 		volumes:
 			- mariadb-database:/var/lib/mysql
 		networks:

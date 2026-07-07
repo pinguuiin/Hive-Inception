@@ -35,7 +35,7 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 		--allow-root >/dev/null 2>&1
 	do
 		if [ "$elapsed" -ge "$timeout" ]; then
-			echo "Timed out waiting for MariaDB"
+			echo "Timed out waiting for MariaDB database to be ready and configured"
 			exit 1
 		fi
 

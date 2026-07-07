@@ -1,0 +1,54 @@
+services:
+	# NGINX web server
+	nginx:
+		build: ./requirements/nginx
+		container_name: inception_nginx
+		depends_on:
+			- wordpress
+		ports:
+			- "443:443"
+		wolumes:
+			- wordpress-data:/var/www/html
+		networks:
+			- inception_net
+		restart: unless-stopped
+
+	# WordPress + PHP-FPM service
+	wordpress:
+		build:./requirements/wordpress
+		container_name: inception_wordpress
+		depends_on:
+			- mariadb
+		volumes:
+			- wordpress-data:/var/www/html
+		networks:
+			- inception_net
+		restart: unless-stopped
+
+	# MariaDB database management system
+	mariadb:
+		build:./requirements/mariadb
+		container_name: inception_mariadb
+		volumes:
+			- mariadb-database:/var/lib/mysql
+		networks:
+			- inception_net
+		restart: unless-stopped
+
+	volumes:
+		mariadb-database:
+			driver_opts:
+				type: none
+				o: bind
+				device: /home/piyu/data/mariadb
+
+		wordpress-data:
+			driver_opts:
+				type: none
+				o: bind
+				device: /home/piyu/data/wordpress
+
+	networks:
+		inception_net:
+			driver: bridge
+

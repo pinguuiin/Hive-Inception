@@ -24,6 +24,7 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 		--allow-root
 	echo "Done"
 
+	# MariaDB needs to be ready before running `wp core install` as it will try to connect to it
 	echo -n "Waiting for MariaDB...   "
 	until wp db check \
 		--path="$WP_PATH" \

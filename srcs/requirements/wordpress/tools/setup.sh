@@ -26,11 +26,21 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 
 	# MariaDB needs to be ready before running `wp core install` as it will try to connect to it
 	echo -n "Waiting for MariaDB...   "
+
+	timeout=60
+	elapsed=0
+
 	until wp db check \
 		--path="$WP_PATH" \
 		--allow-root >/dev/null 2>&1
 	do
+		if [ "$elapsed" -ge "$timeout" ]; then
+			echo "Timed out waiting for MariaDB"
+			exit 1
+		fi
+
 		sleep 2
+		elapsed=$((elapsed + 2))
 	done
 	echo "Done"
 

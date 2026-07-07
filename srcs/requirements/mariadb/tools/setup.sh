@@ -11,9 +11,19 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 	mysqld --user=mysql --skip-networking &
 
 	# Sleep until the server is ready
+
+	timeout=30
+	elapsed=0
+
 	until mariadb-admin ping >/dev/null 2>&1
 	do
+		if [ "$elapsed" -ge "$timeout" ]; then
+			echo "Timed out waiting for MariaDB to start"
+			exit 1
+		fi
+
 		sleep 1
+		elapsed=$((elapsed + 1))
 	done
 
 	mariadb <<EOF

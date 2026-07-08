@@ -5,8 +5,8 @@ set -euo pipefail
 
 # Read secret. Exit on error.
 read_secret() {
-	local file_path = "$1"
-	local var = "$2"
+	local file_path="$1"
+	local var="$2"
 
 	# The secret file env var is not set
 	if [ -z "${file_path:-}" ]; then
@@ -29,7 +29,7 @@ read_secret() {
 	# The secret file is empty
 	local temp
 
-	temp = $(cat "$file_path")
+	temp=$(cat "$file_path")
 	if [ -z "$temp" ]; then
 		echo "Error: The secret file $file_path is empty" >&2
 		exit 1;

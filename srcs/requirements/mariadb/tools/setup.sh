@@ -1,5 +1,46 @@
 #!/bin/sh
 
+# Fail immediately and loudly when an error occurs
+set -euo pipefail
+
+# Read secret. Exit on error.
+read_secret() {
+	local file_path = "$1"
+	local var = "$2"
+
+	# The secret file env var is not set
+	if [ -z "${file_path:-}" ]; then
+		echo "Error: The file path variable to secret $var is not set" >&2
+		exit 1
+	fi
+
+	# The secret file doesn't exist
+	if [ ! -f "$file_path" ]; then
+		echo "Error: The secret file $file_path doesn't exist" >&2
+		exit 1
+	fi
+
+	# The secret file exists but not accessible
+	if [ ! -r "$file_path" ]; then
+		echo "Error: No permission to read the secret file $file_path" >&2
+		exit 1
+	fi
+
+	# The secret file is empty
+	local temp
+
+	temp = $(cat "$file_path")
+	if [ -z "$temp" ]; then
+		echo "Error: The secret file $file_path is empty" >&2
+		exit 1;
+	fi
+
+	export "$var"="$temp"
+}
+
+read_secret "$MYSQL_PASSWORD_FILE" MYSQL_PASSWORD
+read_secret "$MYSQL_ROOT_PASSWORD_FILE" MYSQL_ROOT_PASSWORD
+
 # Check if the database has already been initialized, if not then initialize it
 if [ ! -d "/var/lib/mysql/mysql" ]; then
 

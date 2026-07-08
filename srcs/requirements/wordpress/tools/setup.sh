@@ -5,6 +5,45 @@ set -euo pipefail
 
 WP_PATH="/var/www/html"
 
+# Read secret. Exit on error.
+read_secret() {
+	local file_path = "$1"
+	local var = "$2"
+
+	# The secret file env var is not set
+	if [ -z "${file_path:-}" ]; then
+		echo "Error: The file path variable to secret $var is not set" >&2
+		exit 1
+	fi
+
+	# The secret file doesn't exist
+	if [ ! -f "$file_path" ]; then
+		echo "Error: The secret file $file_path doesn't exist" >&2
+		exit 1
+	fi
+
+	# The secret file exists but not accessible
+	if [ ! -r "$file_path" ]; then
+		echo "Error: No permission to read the secret file $file_path" >&2
+		exit 1
+	fi
+
+	# The secret file is empty
+	local temp
+
+	temp = $(cat "$file_path")
+	if [ -z "$temp" ]; then
+		echo "Error: The secret file $file_path is empty" >&2
+		exit 1;
+	fi
+
+	export "$var"="$temp"
+}
+
+read_secret "$MYSQL_PASSWORD_FILE" MYSQL_PASSWORD
+read_secret "$WP_ADMIN_PASSWORD_FILE" WP_ADMIN_PASSWORD
+read_secret "$WP_USER_PASSWORD_FILE" WP_USER_PASSWORD
+
 # Initialize WordPress on the first run
 if [ ! -f "$WP_PATH/wp-config.php" ]; then
 

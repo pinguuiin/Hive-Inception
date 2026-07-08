@@ -1,82 +1,82 @@
 secrets:
-	mysql_password:
-		file: ../secrets/mysql_password
-	mysql_root_password:
-		file: ../secrets/mysql_root_password
-	wp_admin_password:
-		file: ../secrets/wp_admin_password
-	wp_user_password:
-		file: ../secrets/wp_user_password
+  mysql_password:
+    file: ../secrets/mysql_password
+  mysql_root_password:
+    file: ../secrets/mysql_root_password
+  wp_admin_password:
+    file: ../secrets/wp_admin_password
+  wp_user_password:
+    file: ../secrets/wp_user_password
 
 services:
-	# NGINX web server
-	nginx:
-		build: ./requirements/nginx
-		container_name: inception_nginx
-		depends_on:
-			- wordpress
-		ports:
-			- "443:443"
-		volumes:
-			- wordpress-data:/var/www/html
-		networks:
-			- inception_net
-		restart: unless-stopped
+  # NGINX web server
+  nginx:
+    build: ./requirements/nginx
+    container_name: inception_nginx
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress-data:/var/www/html
+    networks:
+      - inception_net
+    restart: unless-stopped
 
-	# WordPress + PHP-FPM service
-	wordpress:
-		build:./requirements/wordpress
-		container_name: inception_wordpress
-		depends_on:
-			- mariadb
-		env_file:
-			- .env
-		secrets:
-			- mysql_password
-			- wp_admin_password
-			- wp_user_password
-		environment:
-			MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-			WP_ADMIN_PASSWORD_FILE: /run/secrets/wp_admin_password
-			WP_USER_PASSWORD_FILE: /run/secrets/wp_user_password
-		volumes:
-			- wordpress-data:/var/www/html
-		networks:
-			- inception_net
-		restart: unless-stopped
+  # WordPress + PHP-FPM service
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: inception_wordpress
+    depends_on:
+      - mariadb
+    env_file:
+      - .env
+    secrets:
+      - mysql_password
+      - wp_admin_password
+      - wp_user_password
+    environment:
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      WP_ADMIN_PASSWORD_FILE: /run/secrets/wp_admin_password
+      WP_USER_PASSWORD_FILE: /run/secrets/wp_user_password
+    volumes:
+      - wordpress-data:/var/www/html
+    networks:
+      - inception_net
+    restart: unless-stopped
 
-	# MariaDB database management system
-	mariadb:
-		build:./requirements/mariadb
-		container_name: inception_mariadb
-		env_file:
-			- .env
-		secrets:
-			- mysql_password
-			- mysql_root_password
-		environment:
-			MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-			MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
-		volumes:
-			- mariadb-database:/var/lib/mysql
-		networks:
-			- inception_net
-		restart: unless-stopped
+  # MariaDB database management system
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: inception_mariadb
+    env_file:
+      - .env
+    secrets:
+      - mysql_password
+      - mysql_root_password
+    environment:
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    volumes:
+      - mariadb-database:/var/lib/mysql
+    networks:
+      - inception_net
+    restart: unless-stopped
 
-	volumes:
-		mariadb-database:
-			driver_opts:
-				type: none
-				o: bind
-				device: /home/piyu/data/mariadb
+volumes:
+  mariadb-database:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/piyu/data/mariadb
 
-		wordpress-data:
-			driver_opts:
-				type: none
-				o: bind
-				device: /home/piyu/data/wordpress
+  wordpress-data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/piyu/data/wordpress
 
-	networks:
-		inception_net:
-			driver: bridge
+networks:
+  inception_net:
+    driver: bridge
 

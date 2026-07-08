@@ -12,7 +12,7 @@ RUN openssl req -x509 -nodes -days 365 \
     -out /etc/nginx/ssl/inception.crt \
     -subj "/C=FI/ST=Uusimaa/L=Helsinki/O=Hive/CN=piyu.42.fr"
 
-COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
+COPY conf/nginx.conf /etc/nginx/http.d/default.conf
 
 EXPOSE 443
 

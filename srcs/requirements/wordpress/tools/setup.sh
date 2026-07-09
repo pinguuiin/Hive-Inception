@@ -44,16 +44,37 @@ read_secret "$MYSQL_PASSWORD_FILE" MYSQL_PASSWORD
 read_secret "$WP_ADMIN_PASSWORD_FILE" WP_ADMIN_PASSWORD
 read_secret "$WP_USER_PASSWORD_FILE" WP_USER_PASSWORD
 
-# Initialize WordPress on the first run
-if [ ! -f "$WP_PATH/wp-config.php" ]; then
 
-	echo -n "Downloading WordPress core files...   "
+# Download WordPress core file if needed
+if [ ! -f "$WP_PATH/wp-load.php" ]; then
+	echo "Downloading WordPress core files..."
 	wp core download \
 		--path="$WP_PATH" \
 		--allow-root
-	echo "Done"
+fi
 
-	echo -n "Creating wp-config.php...   "
+# MariaDB needs to be ready before running `wp config create` as it will try to connect to the database
+echo "Waiting for MariaDB..."
+
+timeout=60
+elapsed=0
+
+until wp db check \
+	--path="$WP_PATH" \
+	--allow-root >/dev/null 2>&1
+do
+	if [ "$elapsed" -ge "$timeout" ]; then
+		echo "Timed out waiting for MariaDB database to be ready and configured"
+		exit 1
+	fi
+
+	sleep 2
+	elapsed=$((elapsed + 2))
+done
+
+# Create config file if needed
+if [ ! -f "$WP_PATH/wp-config.php" ]; then
+	echo "Creating wp-config.php..."
 	wp config create \
 		--path="$WP_PATH" \
 		--dbname="$MYSQL_DATABASE" \
@@ -61,29 +82,10 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 		--dbpass="$MYSQL_PASSWORD" \
 		--dbhost="$MYSQL_HOST" \
 		--allow-root
-	echo "Done"
+fi
 
-	# MariaDB needs to be ready before running `wp core install` as it will try to connect to it
-	echo -n "Waiting for MariaDB...   "
-
-	timeout=60
-	elapsed=0
-
-	until wp db check \
-		--path="$WP_PATH" \
-		--allow-root >/dev/null 2>&1
-	do
-		if [ "$elapsed" -ge "$timeout" ]; then
-			echo "Timed out waiting for MariaDB database to be ready and configured"
-			exit 1
-		fi
-
-		sleep 2
-		elapsed=$((elapsed + 2))
-	done
-	echo "Done"
-
-	echo -n "Installing WordPress...   "
+if ! wp core is-installed --path="$WP_PATH" --allow-root >/dev/null 2>&1; then
+	echo "Installing WordPress..."
 	wp core install \
 		--path="$WP_PATH" \
 		--url="$DOMAIN_NAME" \
@@ -92,9 +94,10 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 		--admin_password="$WP_ADMIN_PASSWORD" \
 		--admin_email="$WP_ADMIN_EMAIL" \
 		--allow-root
-	echo "Done"
+fi
 
-	echo -n "Creating new user...   "
+if ! wp user get "$WP_USER" --path="$WP_PATH" --allow-root >/dev/null 2>&1; then
+	echo "Creating new user..."
 	wp user create \
 		"$WP_USER" \
 		"$WP_USER_EMAIL" \
@@ -102,8 +105,6 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 		--role=author \
 		--path="$WP_PATH" \
 		--allow-root
-	echo "Done"
-
 fi
 
 # Replace the current shell process with the PHP-FPM process and run it in the foreground instead of daemonizing

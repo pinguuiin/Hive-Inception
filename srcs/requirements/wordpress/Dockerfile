@@ -8,6 +8,9 @@ RUN apk update && \
     php83-phar \
     curl
 
+# Increase PHP's memory limit to avoid memory exhaustion errors
+RUN echo "memory_limit = 512M" > /etc/php83/conf.d/99-memory-limit.ini
+
 # Install WP-CLI and move it to system PATH to make it executable by just typing `wp`
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x wp-cli.phar \

@@ -53,7 +53,19 @@ if [ ! -f "$WP_PATH/wp-load.php" ]; then
 		--allow-root
 fi
 
-# MariaDB needs to be ready before running `wp config create` as it will try to connect to the database
+# Create config file if needed
+if [ ! -f "$WP_PATH/wp-config.php" ]; then
+	echo "Creating wp-config.php..."
+	wp config create \
+		--path="$WP_PATH" \
+		--dbname="$MYSQL_DATABASE" \
+		--dbuser="$MYSQL_USER" \
+		--dbpass="$MYSQL_PASSWORD" \
+		--dbhost="$MYSQL_HOST" \
+		--allow-root
+fi
+
+# MariaDB needs to be ready before running `wp core install` as it will try to connect to the database
 echo "Waiting for MariaDB..."
 
 timeout=60
@@ -72,18 +84,7 @@ do
 	elapsed=$((elapsed + 2))
 done
 
-# Create config file if needed
-if [ ! -f "$WP_PATH/wp-config.php" ]; then
-	echo "Creating wp-config.php..."
-	wp config create \
-		--path="$WP_PATH" \
-		--dbname="$MYSQL_DATABASE" \
-		--dbuser="$MYSQL_USER" \
-		--dbpass="$MYSQL_PASSWORD" \
-		--dbhost="$MYSQL_HOST" \
-		--allow-root
-fi
-
+# Install WordPress if needed
 if ! wp core is-installed --path="$WP_PATH" --allow-root >/dev/null 2>&1; then
 	echo "Installing WordPress..."
 	wp core install \
@@ -96,6 +97,7 @@ if ! wp core is-installed --path="$WP_PATH" --allow-root >/dev/null 2>&1; then
 		--allow-root
 fi
 
+# Create the new user if it is missing
 if ! wp user get "$WP_USER" --path="$WP_PATH" --allow-root >/dev/null 2>&1; then
 	echo "Creating new user..."
 	wp user create \

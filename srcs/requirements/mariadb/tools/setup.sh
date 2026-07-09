@@ -41,6 +41,10 @@ read_secret() {
 read_secret "$MYSQL_PASSWORD_FILE" MYSQL_PASSWORD
 read_secret "$MYSQL_ROOT_PASSWORD_FILE" MYSQL_ROOT_PASSWORD
 
+# Create the runtime directory for the Unix socket
+mkdir -p /run/mysqld
+chown mysql:mysql /run/mysqld
+
 # Check if the database has already been initialized, if not then initialize it
 if [ ! -d "/var/lib/mysql/mysql" ]; then
 

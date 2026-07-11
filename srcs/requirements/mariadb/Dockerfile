@@ -10,7 +10,7 @@ COPY tools/setup.sh /setup.sh
 
 RUN chmod +x /setup.sh
 
-# Mainly for documentation as the containers communicate over the internal network
+# Documents the port number the container listens on
 EXPOSE 3306
 
 CMD ["/setup.sh"]

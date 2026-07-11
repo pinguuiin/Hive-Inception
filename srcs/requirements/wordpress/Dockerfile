@@ -5,7 +5,10 @@ RUN apk update && \
     php83 \
     php83-fpm \
     php83-mysqli \
+    php83-mbstring \
+    php83-iconv \
     php83-phar \
+    mariadb-client \
     curl
 
 # Increase PHP's memory limit to avoid memory exhaustion errors
@@ -28,8 +31,7 @@ COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
 COPY tools/setup.sh /usr/local/bin/setup.sh
 RUN chmod +x /usr/local/bin/setup.sh
 
-# PHP-FPM listens on port 9000, mainly for documentation as containers communicate over
-# the internal network. This port is not published to the host.
+# Documents the port number PHP-FPM listens on
 EXPOSE 9000
 
 CMD ["/usr/local/bin/setup.sh"]

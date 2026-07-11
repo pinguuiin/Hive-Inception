@@ -14,6 +14,8 @@ RUN openssl req -x509 -nodes -days 365 \
 
 COPY conf/nginx.conf /etc/nginx/http.d/default.conf
 
+# Documents the port number the application listens on. It is not published to the host
+# unless running docker with --publish-all or -P option
 EXPOSE 443
 
 CMD ["nginx", "-g", "daemon off;"]

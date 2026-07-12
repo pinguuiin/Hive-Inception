@@ -41,6 +41,13 @@ read_secret() {
 read_secret "$MYSQL_PASSWORD_FILE" MYSQL_PASSWORD
 read_secret "$MYSQL_ROOT_PASSWORD_FILE" MYSQL_ROOT_PASSWORD
 
+# The mariadb/mariadb-admin clients read the MYSQL_HOST environment variable.
+# This container inherits MYSQL_HOST=mariadb from the shared .env (it is meant
+# for WordPress), which would make the local admin commands below connect over
+# TCP to the not-yet-networked server during setup and fail. Unset it so they
+# use the local Unix socket instead.
+unset MYSQL_HOST
+
 # Create the runtime directory for the Unix socket
 mkdir -p /run/mysqld
 chown mysql:mysql /run/mysqld
@@ -60,7 +67,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 	timeout=30
 	elapsed=0
 
-	until mariadb-admin ping >/dev/null 2>&1
+	until mariadb-admin --protocol=socket ping >/dev/null 2>&1
 	do
 		if [ "$elapsed" -ge "$timeout" ]; then
 			echo "Timed out waiting for MariaDB to start"
@@ -71,7 +78,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 		elapsed=$((elapsed + 1))
 	done
 
-	mariadb <<EOF
+	mariadb --protocol=socket <<EOF
 -- Create the WordPress database
 CREATE DATABASE $MYSQL_DATABASE;
 -- Create the user: '%' means any host

@@ -62,11 +62,12 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
 		--dbuser="$MYSQL_USER" \
 		--dbpass="$MYSQL_PASSWORD" \
 		--dbhost="$MYSQL_HOST" \
+		--skip-check \
 		--allow-root
 fi
 
-# MariaDB needs to be ready before running `wp core install` as it will try to connect to the database
-echo "Waiting for MariaDB..."
+# Wait for MariaDB database to be ready and configured
+echo "Waiting for MariaDB database to be ready..."
 
 timeout=60
 elapsed=0

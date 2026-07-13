@@ -1,3 +1,5 @@
+name: Inception
+
 secrets:
   mysql_password:
     file: ../secrets/mysql_password

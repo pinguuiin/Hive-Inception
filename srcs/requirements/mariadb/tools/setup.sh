@@ -58,8 +58,10 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 	#initialize the database
 	mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
-	# Start MariaDB server (daemon) temporarily to create users and databases, so no networking needed
-	# `&` means running in the background. Otherwise the script would stop here forever, because `mysqld` never exits on its own
+	# Start MariaDB server (daemon) temporarily to create users and databases,
+	# so no networking needed.
+	# `&` means running in the background. Otherwise the script would stop here
+	# forever, because `mysqld` never exits on its own
 	mysqld --user=mysql --skip-networking &
 
 	# Sleep until the server is ready

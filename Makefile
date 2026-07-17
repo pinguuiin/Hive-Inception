@@ -43,9 +43,9 @@ else
 	$(COMPOSE) -f $(COMPOSE_FILE) logs -f
 endif
 
-# List all containers, including those that are stopped, exited or crashed, and only list the container IDs
+# List all containers, including those that are stopped, exited or crashed
 ps:
-	$(COMPOSE) -f $(COMPOSE_FILE) ps -aq
+	$(COMPOSE) -f $(COMPOSE_FILE) ps
 
 # Remove all containers and volumes
 clean:

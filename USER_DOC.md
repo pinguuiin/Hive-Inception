@@ -158,11 +158,10 @@ To rotate a password, edit the file and run `make re` to restart the stack.
 **Are all three containers up?**
 
 ```sh
-docker compose -f srcs/docker-compose.yml ps    # full table with states
-make ps                                         # quick list of container IDs
+make ps    # the full table with container names and states
 ```
 
-With `docker compose ps` you should see `nginx`, `wordpress`, and `mariadb` all in state `Up`.
+You should see `nginx`, `wordpress`, and `mariadb` all in state `Up`.
 
 **Watch the logs (all services, or one):**
 
@@ -172,7 +171,7 @@ make logs SERVICE=wordpress     # a single service
 ```
 
 Healthy startup shows MariaDB becoming ready, then WordPress reporting
-"Installing WordPress…" / "Starting PHP-FPM…". NGINX doesn't show any log, because it logs to files inside the container. You can access it by running
+"Installing WordPress..." / "Starting PHP-FPM...". NGINX doesn't show any log, because it logs to files inside the container. You can access it by running
 ```sh
 docker exec -it inception_nginx cat /var/log/nginx/access.log 2>&1
 ```

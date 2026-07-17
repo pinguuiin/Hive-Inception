@@ -21,3 +21,37 @@
 (source file - */etc/apk/repositories*)
 - docker
 - docker-cli-compose
+
+
+### Repository layout
+
+```
+.
+├── Makefile
+├── README.md
+├── USER_DOC.md
+├── DEV_DOC.md
+├── secrets/                        # local only, git-ignored
+│   ├── mysql_password
+│   ├── mysql_root_password
+│   ├── wp_admin_password
+│   └── wp_user_password
+└── srcs/
+    ├── .env                        # local only, git-ignored
+    ├── .env.example                # committed template
+    ├── docker-compose.yml
+    └── requirements/
+        ├── mariadb/
+        │   ├── Dockerfile
+        │   ├── conf/my.cnf
+        │   └── tools/setup.sh
+        ├── nginx/
+        │   ├── Dockerfile
+        │   └── conf/nginx.conf
+        └── wordpress/
+            ├── Dockerfile
+            ├── conf/www.conf
+            └── tools/setup.sh
+```
+
+---

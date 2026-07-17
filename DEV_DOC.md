@@ -35,6 +35,7 @@ volumes (bind mounts on host):
 ### 2.1 Prerequisites
 
 - Linux host (the project targets an Alpine VM; see `README.md`).
+- SSH and GUI to enable cross-machine share and web browsing on the VM (see *Section 2.2* and *2.3*).
 - **Docker Engine** and the **Docker Compose v2 plugin** (`docker compose`).
 - `sudo`/root to create the host data directories.
 - The domain resolving locally — add to `/etc/hosts`:
@@ -43,7 +44,102 @@ volumes (bind mounts on host):
   127.0.0.1   piyu.42.fr www.piyu.42.fr
   ```
 
-### 2.2 Host data directories
+### 2.2 SSH installation and setup
+
+#### 2.2.1 Install and enable SSH
+
+``` sh
+apk add openssh
+rc-update add sshd
+rc-service sshd start
+```
+
+#### 2.2.2 VirtualBox networking and SSH connection
+
+-   Configure NAT port forwarding:
+    -   Host port: `4241`
+    -   Guest port: `22`
+-   Connect from host:
+
+``` sh
+ssh -p 4241 piyu@localhost
+```
+
+Remove the old host key if you receive a host identification warning, and reconnect:
+
+``` sh
+ssh-keygen -f ~/.ssh/known_hosts -R "[localhost]:4241"
+ssh -p 4241 piyu@localhost
+```
+
+#### 2.2.3 (Optional) Install sudo
+
+``` sh
+apk add sudo
+adduser piyu wheel
+visudo
+# uncomment:
+# %wheel ALL=(ALL:ALL) ALL
+```
+
+#### 2.2.4 (Optional) Add user to `docker` group
+
+If you are logged in as a user that doesn't belong to the `docker` group, you have no permission to run docker. To fix it, add your user to the group:
+
+```sh
+sudo addgroup piyu docker
+```
+
+Then **log out of the SSH session and log back** in so the new group membership takes effect.
+
+### 2.3 GUI installation and setup
+
+#### 2.3.1 Install XFCE
+
+``` sh
+apk add xorg-server xinit xfce4 xfce4-terminal     libinput xf86-input-libinput
+```
+
+#### 2.3.2  Fix missing keyboard/mouse in the XFCE desktop - Enable eudev and configure VirtualBox
+
+``` sh
+apk add eudev eudev-openrc
+rc-update add udev sysinit
+rc-update add udev-trigger sysinit
+rc-update add udev-settle sysinit
+reboot
+```
+
+Verify that mouse and keyboard are listed:
+
+``` sh
+libinput list-devices
+xinput list   # run it from your VM
+```
+
+Power off the VM first and go to VirtualBox Settings:
+
+System → Motherboard - Pointing Device: **USB Tablet**
+
+Display - Graphics Controller: **VBoxSVGA** - Video Memory: 128 MB - 3D Acceleration: Disabled (recommended)
+
+#### 2.3.3 Start XFCE manually
+
+``` sh
+echo "exec startxfce4" > ~/.xinitrc
+startx    # run from your VM
+```
+
+Run `startx` from the VM console, **not over SSH**.
+
+#### 2.3.4 Troubleshooting
+
+-   `startx: not found` → `apk add xinit`
+-   `Only console users are allowed to run the X server` → run `startx` from the VM console.
+-   `libinput list-devices` empty → install/enable `eudev`.
+-   Mouse invisible/unusable → switch VirtualBox Pointing Device to **USB Tablet**.
+
+### 2.4 Host data directories
 
 The volumes are **bind mounts** under `/home/piyu/data`. You do **not** need to create them by hand: Both `make build` and `make up` creates the paths `/home/piyu/data/mariadb` and `/home/piyu/data/wordpress` if they are missing. To create them manually (e.g. when running Compose directly):
 
@@ -53,7 +149,7 @@ mkdir -p /home/piyu/data/wordpress /home/piyu/data/mariadb
 
 > If you are using a different login name, update `DATA_PATH` in the `Makefile`, the paths in `srcs/docker-compose.yml` (the `volumes:` entries), and the `server_name`/`SSL certificate CN` in the NGINX config accordingly.
 
-### 2.3 Environment file
+### 2.5 Environment file
 
 Copy the template to `.env`:
 ```sh
@@ -76,7 +172,7 @@ Then edit `srcs/.env`:
 
 Passwords live in a separate directory `secrets/` (local, gitignored).
 
-### 2.4 Secrets
+### 2.6 Secrets
 
 `docker-compose.yml` declares four Docker secrets, each backed by a file in `../secrets/` (repo root), mounted into containers at `/run/secrets/<name>`:
 
@@ -103,6 +199,8 @@ The containers receive the secret **paths** via `*_FILE` environment variables (
 ---
 
 ## 3. Building and launching
+
+Start an SSH session in your host machine or run the command directly in the VM.
 
 The `Makefile` (repo root) is the entry point; it wraps Docker Compose. The targets below are what it actually defines. Equivalent raw commands are shown so you can run them directly.
 

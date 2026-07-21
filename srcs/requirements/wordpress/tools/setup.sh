@@ -112,5 +112,5 @@ fi
 
 # Replace the current shell process with the PHP-FPM process and run it in the foreground instead of daemonizing
 echo "Starting PHP-FPM..."
-exec php-fpm83 -F
+exec php-fpm84 -F
 

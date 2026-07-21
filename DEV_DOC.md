@@ -6,7 +6,7 @@ This document describes how to set up the Inception project from scratch, build 
 
 ## 1. Architecture overview
 
-Three services, each built from a **custom Dockerfile** (no pre-built application images are pulled — only the `alpine:3.21` base), orchestrated by a single `docker-compose.yml` and connected by one bridge network.
+Three services, each built from a **custom Dockerfile** (no pre-built application images are pulled — only the `alpine:3.23` base), orchestrated by a single `docker-compose.yml` and connected by one bridge network.
 
 ```
                  host :443
@@ -236,7 +236,7 @@ The `Makefile` (repo root) is the entry point; it wraps Docker Compose. The targ
 - waits for the DB to be ready with `wp db check`
 - installs WordPress
 - creates the second user (role `author`)
-- `exec`s `php-fpm83 -F` as PID 1.
+- `exec`s `php-fpm84 -F` as PID 1.
 3. **nginx**:
 - serves `/var/www/html` over TLS 1.3 on 443 and forwards `*.php` to `wordpress:9000` via FastCGI
 - runs `nginx -g "daemon off;"` in the foreground.
@@ -327,7 +327,7 @@ which runs `down -v`, `docker system prune -af`, `docker volume prune -f`, and
 
 ### Design notes
 
-- **No `latest` tags** — every base image is pinned (`alpine:3.21`).
+- **No `latest` tags** — every base image is pinned (`alpine:3.23`).
 - **TLS** — NGINX terminates TLS with `ssl_protocols TLSv1.3;` and is the only published port (443).
 - **Secrets vs env vars** — passwords go through Docker secrets (files under `/run/secrets`); only non-sensitive config is in `.env`.
 - **PID 1** — each container's main process is the service itself via `exec` and `daemon off`.

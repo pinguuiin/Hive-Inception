@@ -16,7 +16,7 @@ Three services, each built from a **custom Dockerfile** (no pre-built applicatio
              └───────┬────────┘
              FastCGI │ :9000
            ┌─────────▼──────────┐
-           │inception_wordpress │  WordPress + PHP-FPM 8.3 + WP-CLI
+           │inception_wordpress │  WordPress + PHP-FPM 8.4 + WP-CLI
            └─────────┬──────────┘
                MySQL │ :3306
             ┌────────▼────────┐
